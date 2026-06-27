@@ -1,4 +1,6 @@
+
 const { contextBridge, ipcRenderer } = require('electron');
+
 
 // フロントエンドの window.myAPI として機能を公開する
 contextBridge.exposeInMainWorld('myAPI', {
