@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Electron IPC 通信テスト</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <h1>Electron通信学習アプリ</h1>
+
+  <div>
+    <h2>1. 基本の通信</h2>
+    <button id="pingBtn">バックエンドにPingを送信</button>
+    <p>結果: <span id="pingResult"></span></p>
+  </div>
+
+  <div>
+    <h2>2. システム情報の取得 (Node.js機能)</h2>
+    <button id="sysBtn">このPCの情報を取得</button>
+    <p>結果: <span id="sysResult"></span></p>
+  </div>
+
+  <script src="./renderer.js"></script>
+</body>
+</html>

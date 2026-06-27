@@ -1,0 +1,23 @@
+{
+  "name": "electron-sandbax",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/gaku9922/electron-sandbax#readme",
+  "bugs": {
+    "url": "https://github.com/gaku9922/electron-sandbax/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaku9922/electron-sandbax.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "src/backend/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^42.5.0"
+  }
+}

@@ -1,0 +1,145 @@
+/* ---------- Design Tokens ---------- */
+:root {
+    --font-ui:   -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  
+    --bg:          #F7F8FA;
+    --surface:     #FFFFFF;
+    --border:      #E2E5EB;
+    --text-primary:   #1A1D23;
+    --text-secondary: #5C6270;
+    --accent:      #4F5FD3;
+    --accent-hover:#3A4DBF;
+    --accent-light:#EEF0FB;
+    --radius:      8px;
+    --shadow:      0 1px 3px rgba(0,0,0,.07), 0 4px 12px rgba(0,0,0,.04);
+  }
+  
+  /* ---------- Reset & Base ---------- */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  html, body {
+    height: 100%;
+  }
+  
+  body {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background: var(--bg);
+    padding: 32px 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  /* ---------- Page Header ---------- */
+  h1 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  h1::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 18px;
+    background: var(--accent);
+    border-radius: 3px;
+  }
+  
+  /* ---------- Section Cards ---------- */
+  body > div {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px 24px;
+    margin-bottom: 16px !important;
+  }
+  
+  h2 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+  }
+  
+  /* ---------- Buttons ---------- */
+  button {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 500;
+    color: #FFFFFF;
+    background: var(--accent);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+    outline-offset: 3px;
+  }
+  
+  button:hover {
+    background: var(--accent-hover);
+  }
+  
+  button:active {
+    transform: scale(0.97);
+  }
+  
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+  }
+  
+  /* ---------- Result Lines ---------- */
+  p {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  
+  /* 結果スパン — ターミナル風インラインブロック */
+  span#pingResult,
+  span#sysResult {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    background: #F0F2F5;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    display: inline-block;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  
+  /* 値が入ったとき色で区別 */
+  span#pingResult:not(:empty) {
+    background: #EEF0FB;
+    border-color: #C5CAF0;
+    color: #4F5FD3 !important;
+  }
+  
+  span#sysResult:not(:empty) {
+    background: #EDFBF2;
+    border-color: #B6E8CC;
+    color: #1E6E42 !important;
+  }
