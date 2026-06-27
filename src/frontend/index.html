@@ -1,24 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Electron IPC 通信テスト</title>
+  <title>Electron ファイル操作</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <h1>Electron通信学習アプリ</h1>
 
-  <div>
-    <h2>1. 基本の通信</h2>
-    <button id="pingBtn">バックエンドにPingを送信</button>
-    <p>結果: <span id="pingResult"></span></p>
-  </div>
+  <header class="app-header">
+    <span class="app-header__bar"></span>
+    <h1>JSON ファイルマネージャー</h1>
+    <span class="root-badge" id="rootBadge">読み込み中…</span>
+  </header>
 
-  <div>
-    <h2>2. システム情報の取得 (Node.js機能)</h2>
-    <button id="sysBtn">このPCの情報を取得</button>
-    <p>結果: <span id="sysResult"></span></p>
-  </div>
+  <main class="layout">
+
+    <!-- ===== 左ペイン: ファイルツリー ===== -->
+    <aside class="pane pane--tree">
+      <div class="pane__header">
+        <span class="pane__title">ファイルツリー</span>
+        <button class="icon-btn" id="refreshBtn" title="更新">↺</button>
+      </div>
+      <div class="tree" id="tree">
+        <p class="placeholder">読み込み中…</p>
+      </div>
+    </aside>
+
+    <!-- ===== 中央ペイン: JSON エディタ ===== -->
+    <section class="pane pane--editor">
+      <div class="pane__header">
+        <span class="pane__title" id="editorTitle">ファイルを選択してください</span>
+        <div class="editor-actions">
+          <button class="btn btn--primary" id="saveBtn" disabled>保存</button>
+          <button class="btn btn--danger"  id="deleteBtn" disabled>削除</button>
+        </div>
+      </div>
+      <textarea class="editor" id="editor" placeholder="JSON を入力してください" disabled></textarea>
+      <p class="editor-error" id="editorError"></p>
+    </section>
+
+    <!-- ===== 右ペイン: 新規作成 ===== -->
+    <aside class="pane pane--create">
+      <div class="pane__header">
+        <span class="pane__title">新規 JSON 作成</span>
+      </div>
+      <div class="create-form">
+        <label class="form-label">
+          ファイルパス
+          <span class="form-hint">例: subdir/data.json</span>
+          <input class="form-input" type="text" id="newPath"
+                 placeholder="path/to/file.json">
+        </label>
+        <label class="form-label">
+          内容 (JSON)
+          <textarea class="form-textarea" id="newContent"
+                    placeholder='{"key": "value"}'></textarea>
+        </label>
+        <p class="editor-error" id="createError"></p>
+        <button class="btn btn--primary btn--full" id="createBtn">作成</button>
+      </div>
+    </aside>
+
+  </main>
 
   <script src="./renderer.js"></script>
 </body>
