@@ -1,44 +1,41 @@
-'use strict';
-
 // ------------------------------------------------------------------ //
 //  DOM 参照
 // ------------------------------------------------------------------ //
-const treeEl       = document.getElementById('tree');
-const editorEl     = document.getElementById('editor');
-const editorTitle  = document.getElementById('editorTitle');
-const editorError  = document.getElementById('editorError');
-const saveBtn      = document.getElementById('saveBtn');
-const deleteBtn    = document.getElementById('deleteBtn');
-const refreshBtn   = document.getElementById('refreshBtn');
-const newPathEl    = document.getElementById('newPath');
-const newContentEl = document.getElementById('newContent');
-const createError  = document.getElementById('createError');
-const createBtn    = document.getElementById('createBtn');
-const rootBadge    = document.getElementById('rootBadge');
+const treeEl = document.getElementById('tree')!;
+const editorEl = document.getElementById('editor') as HTMLTextAreaElement;
+const editorTitle = document.getElementById('editorTitle')!;
+const editorError = document.getElementById('editorError')!;
+const saveBtn = document.getElementById('saveBtn') as HTMLButtonElement;
+const deleteBtn = document.getElementById('deleteBtn') as HTMLButtonElement;
+const refreshBtn = document.getElementById('refreshBtn')!;
+const newPathEl = document.getElementById('newPath') as HTMLInputElement;
+const newContentEl = document.getElementById('newContent') as HTMLTextAreaElement;
+const createError = document.getElementById('createError')!;
+const createBtn = document.getElementById('createBtn')!;
+const rootBadge = document.getElementById('rootBadge')!;
 
 // 現在エディタで開いているファイルの相対パス
-let currentPath = null;
+let currentPath: string | null = null;
 
 // ------------------------------------------------------------------ //
 //  ツリー描画
 // ------------------------------------------------------------------ //
+function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
 
 /** ツリーを取得して再描画する */
-async function refreshTree() {
+async function refreshTree(): Promise<void> {
   try {
     const nodes = await window.fileAPI.list();
     renderTree(nodes);
   } catch (err) {
-    treeEl.innerHTML = `<p class="placeholder error">取得失敗: ${err.message}</p>`;
+    treeEl.innerHTML = `<p class="placeholder error">取得失敗: ${errorMessage(err)}</p>`;
   }
 }
 
-/**
- * ノード配列を再帰的に <ul> へ変換する
- * @param {object[]} nodes
- * @returns {HTMLElement}
- */
-function buildTreeUl(nodes) {
+/** ノード配列を再帰的に <ul> へ変換する */
+function buildTreeUl(nodes: TreeNode[]): HTMLUListElement {
   const ul = document.createElement('ul');
   ul.className = 'tree__list';
 
@@ -47,7 +44,6 @@ function buildTreeUl(nodes) {
     li.className = `tree__item tree__item--${node.type}`;
 
     if (node.type === 'dir') {
-      // ディレクトリ: 折りたたみ可能
       const toggle = document.createElement('span');
       toggle.className = 'tree__toggle';
       toggle.textContent = '▾';
@@ -67,7 +63,6 @@ function buildTreeUl(nodes) {
 
       li.append(toggle, label, children);
     } else {
-      // JSON ファイル: クリックで開く
       const label = document.createElement('span');
       label.className = 'tree__label tree__label--file';
       if (node.relativePath === currentPath) {
@@ -84,7 +79,7 @@ function buildTreeUl(nodes) {
   return ul;
 }
 
-function renderTree(nodes) {
+function renderTree(nodes: TreeNode[]): void {
   treeEl.innerHTML = '';
   if (nodes.length === 0) {
     treeEl.innerHTML = '<p class="placeholder">ファイルがありません</p>';
@@ -98,7 +93,7 @@ function renderTree(nodes) {
 // ------------------------------------------------------------------ //
 
 /** ファイルを開いてエディタに表示する */
-async function openFile(relativePath) {
+async function openFile(relativePath: string): Promise<void> {
   try {
     const data = await window.fileAPI.read(relativePath);
     currentPath = relativePath;
@@ -108,10 +103,9 @@ async function openFile(relativePath) {
     saveBtn.disabled = false;
     deleteBtn.disabled = false;
     editorError.textContent = '';
-    // ツリーのアクティブ表示を更新
     refreshTree();
   } catch (err) {
-    editorError.textContent = `読み込み失敗: ${err.message}`;
+    editorError.textContent = `読み込み失敗: ${errorMessage(err)}`;
   }
 }
 
@@ -120,7 +114,7 @@ saveBtn.addEventListener('click', async () => {
   if (!currentPath) return;
   editorError.textContent = '';
 
-  let parsed;
+  let parsed: unknown;
   try {
     parsed = JSON.parse(editorEl.value);
   } catch {
@@ -133,7 +127,7 @@ saveBtn.addEventListener('click', async () => {
     renderTree(newTree);
     showToast('保存しました');
   } catch (err) {
-    editorError.textContent = `保存失敗: ${err.message}`;
+    editorError.textContent = `保存失敗: ${errorMessage(err)}`;
   }
 });
 
@@ -154,7 +148,7 @@ deleteBtn.addEventListener('click', async () => {
     renderTree(newTree);
     showToast('削除しました');
   } catch (err) {
-    editorError.textContent = `削除失敗: ${err.message}`;
+    editorError.textContent = `削除失敗: ${errorMessage(err)}`;
   }
 });
 
@@ -175,7 +169,7 @@ createBtn.addEventListener('click', async () => {
     return;
   }
 
-  let parsed;
+  let parsed: unknown;
   try {
     parsed = rawJson ? JSON.parse(rawJson) : {};
   } catch {
@@ -189,10 +183,9 @@ createBtn.addEventListener('click', async () => {
     newPathEl.value = '';
     newContentEl.value = '';
     showToast(`「${relPath}」を作成しました`);
-    // 作成したファイルをエディタで開く
     openFile(relPath);
   } catch (err) {
-    createError.textContent = `作成失敗: ${err.message}`;
+    createError.textContent = `作成失敗: ${errorMessage(err)}`;
   }
 });
 
@@ -201,12 +194,11 @@ createBtn.addEventListener('click', async () => {
 // ------------------------------------------------------------------ //
 
 /** 一時的なトーストメッセージを表示する */
-function showToast(message) {
+function showToast(message: string): void {
   const toast = document.createElement('div');
   toast.className = 'toast';
   toast.textContent = message;
   document.body.appendChild(toast);
-  // 少し待ってからフェードイン → 自動削除
   requestAnimationFrame(() => {
     toast.classList.add('toast--visible');
     setTimeout(() => {
@@ -222,7 +214,6 @@ function showToast(message) {
 refreshBtn.addEventListener('click', refreshTree);
 
 (async () => {
-  // ROOT_DIR のパスをバッジに表示
   try {
     const rootDir = await window.fileAPI.getRootDir();
     rootBadge.textContent = rootDir;

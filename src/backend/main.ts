@@ -1,19 +1,22 @@
-
-'use strict';
-
-const { app, BrowserWindow, ipcMain } = require('electron');
-const path = require('path');
-const FileManager = require('./fileManager');
+import { app, BrowserWindow, ipcMain } from 'electron';
+import path from 'path';
+import dotenv from 'dotenv';
+import FileManager from './fileManager';
+import type { DeletePayload, ReadPayload, WritePayload } from '../shared/types';
 
 // ------------------------------------------------------------------ //
 //  定数: 操作対象のルートディレクトリ
 // ------------------------------------------------------------------ //
-const ROOT_DIR = '/Users/gakumurakami/000_develop/ナレッジ管理ディレクトリ';
+dotenv.config({ path: path.join(app.getAppPath(), '.env') });
+
+const ROOT_DIR: string = process.env.ROOT_DIR ?? (() => {
+  throw new Error('.env に ROOT_DIR が設定されていません');
+})();
 
 // ------------------------------------------------------------------ //
 //  ウィンドウ生成
 // ------------------------------------------------------------------ //
-const createWindow = () => {
+const createWindow = (): void => {
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -28,33 +31,28 @@ const createWindow = () => {
 // ------------------------------------------------------------------ //
 //  IPC ハンドラ登録
 // ------------------------------------------------------------------ //
-const registerIpcHandlers = (fm) => {
+const registerIpcHandlers = (fm: FileManager): void => {
   // ROOT_DIR のパスを返す
   ipcMain.handle('fs:getRootDir', () => ROOT_DIR);
 
   // ツリー一覧を返す
-  ipcMain.handle('fs:list', () => {
+  ipcMain.handle('fs:list', () => fm.listTree());
+
+  // JSON ファイルを読み込む
+  ipcMain.handle('fs:read', (_event, { relativePath }: ReadPayload) =>
+    fm.readJson(relativePath),
+  );
+
+  // JSON ファイルを書き込む（新規作成 / 上書き）
+  ipcMain.handle('fs:write', (_event, { relativePath, data }: WritePayload) => {
+    fm.writeJson(relativePath, data);
     return fm.listTree();
   });
 
-  // JSON ファイルを読み込む
-  // args: { relativePath: string }
-  ipcMain.handle('fs:read', (_event, { relativePath }) => {
-    return fm.readJson(relativePath);
-  });
-
-  // JSON ファイルを書き込む（新規作成 / 上書き）
-  // args: { relativePath: string, data: object }
-  ipcMain.handle('fs:write', (_event, { relativePath, data }) => {
-    fm.writeJson(relativePath, data);
-    return fm.listTree(); // 書き込み後のツリーを返す
-  });
-
   // JSON ファイルを削除する
-  // args: { relativePath: string }
-  ipcMain.handle('fs:delete', (_event, { relativePath }) => {
+  ipcMain.handle('fs:delete', (_event, { relativePath }: DeletePayload) => {
     fm.deleteJson(relativePath);
-    return fm.listTree(); // 削除後のツリーを返す
+    return fm.listTree();
   });
 };
 

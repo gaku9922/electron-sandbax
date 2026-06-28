@@ -13,11 +13,18 @@
   "license": "ISC",
   "author": "",
   "type": "commonjs",
-  "main": "src/backend/main.js",
+  "main": "dist/backend/main.js",
   "scripts": {
-    "start": "electron ."
+    "build": "tsc && cp src/frontend/index.html src/frontend/style.css dist/frontend/",
+    "start": "npm run build && electron .",
+    "dev": "tsc --watch"
   },
   "devDependencies": {
-    "electron": "^42.5.0"
+    "@types/node": "^24.13.2",
+    "electron": "^42.5.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   }
 }
