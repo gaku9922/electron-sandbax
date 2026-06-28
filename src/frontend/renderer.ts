@@ -1,3 +1,6 @@
+// ------------------------------------------------------------------ //
+//  DOM 参照
+// ------------------------------------------------------------------ //
 const treeEl = document.getElementById('tree')!;
 const editorEl = document.getElementById('editor') as HTMLTextAreaElement;
 const editorTitle = document.getElementById('editorTitle')!;
@@ -11,12 +14,17 @@ const createError = document.getElementById('createError')!;
 const createBtn = document.getElementById('createBtn')!;
 const rootBadge = document.getElementById('rootBadge')!;
 
+// 現在エディタで開いているファイルの相対パス
 let currentPath: string | null = null;
 
+// ------------------------------------------------------------------ //
+//  ツリー描画
+// ------------------------------------------------------------------ //
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
+/** ツリーを取得して再描画する */
 async function refreshTree(): Promise<void> {
   try {
     const nodes = await window.fileAPI.list();
@@ -26,6 +34,7 @@ async function refreshTree(): Promise<void> {
   }
 }
 
+/** ノード配列を再帰的に <ul> へ変換する */
 function buildTreeUl(nodes: TreeNode[]): HTMLUListElement {
   const ul = document.createElement('ul');
   ul.className = 'tree__list';
@@ -79,6 +88,11 @@ function renderTree(nodes: TreeNode[]): void {
   treeEl.appendChild(buildTreeUl(nodes));
 }
 
+// ------------------------------------------------------------------ //
+//  エディタ操作
+// ------------------------------------------------------------------ //
+
+/** ファイルを開いてエディタに表示する */
 async function openFile(relativePath: string): Promise<void> {
   try {
     const data = await window.fileAPI.read(relativePath);
@@ -95,6 +109,7 @@ async function openFile(relativePath: string): Promise<void> {
   }
 }
 
+/** エディタの内容を保存する */
 saveBtn.addEventListener('click', async () => {
   if (!currentPath) return;
   editorError.textContent = '';
@@ -116,6 +131,7 @@ saveBtn.addEventListener('click', async () => {
   }
 });
 
+/** 現在開いているファイルを削除する */
 deleteBtn.addEventListener('click', async () => {
   if (!currentPath) return;
   if (!confirm(`「${currentPath}」を削除しますか？`)) return;
@@ -136,6 +152,9 @@ deleteBtn.addEventListener('click', async () => {
   }
 });
 
+// ------------------------------------------------------------------ //
+//  新規作成
+// ------------------------------------------------------------------ //
 createBtn.addEventListener('click', async () => {
   createError.textContent = '';
   const relPath = newPathEl.value.trim();
@@ -170,6 +189,11 @@ createBtn.addEventListener('click', async () => {
   }
 });
 
+// ------------------------------------------------------------------ //
+//  ユーティリティ
+// ------------------------------------------------------------------ //
+
+/** 一時的なトーストメッセージを表示する */
 function showToast(message: string): void {
   const toast = document.createElement('div');
   toast.className = 'toast';
@@ -184,6 +208,9 @@ function showToast(message: string): void {
   });
 }
 
+// ------------------------------------------------------------------ //
+//  初期化
+// ------------------------------------------------------------------ //
 refreshBtn.addEventListener('click', refreshTree);
 
 (async () => {
