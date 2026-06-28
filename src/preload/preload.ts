@@ -17,6 +17,12 @@ const fileAPI: FileAPI = {
 
   delete: (relativePath: string) =>
     ipcRenderer.invoke('fs:delete', { relativePath }),
+
+  download: (relativePath: string) =>
+    ipcRenderer.invoke('fs:download', { relativePath }),
+
+  upload: (destRelativeDir: string) =>
+    ipcRenderer.invoke('fs:upload', { destRelativeDir }),
 };
 
 // ------------------------------------------------------------------ //

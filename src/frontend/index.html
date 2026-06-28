@@ -39,26 +39,50 @@
       <p class="editor-error" id="editorError"></p>
     </section>
 
-    <!-- ===== 右ペイン: 新規作成 ===== -->
-    <aside class="pane pane--create">
-      <div class="pane__header">
-        <span class="pane__title">新規 JSON 作成</span>
+    <!-- ===== 右ペイン: 新規作成 ＋ アップロード ===== -->
+    <aside class="pane pane--right">
+
+      <!-- 新規 JSON 作成 -->
+      <div class="right-section">
+        <div class="pane__header">
+          <span class="pane__title">新規 JSON 作成</span>
+        </div>
+        <div class="right-section__inner">
+          <label class="form-label">
+            ファイルパス
+            <span class="form-hint">例: subdir/data.json</span>
+            <input class="form-input" type="text" id="newPath"
+                   placeholder="path/to/file.json">
+          </label>
+          <label class="form-label">
+            内容 (JSON)
+            <textarea class="form-textarea" id="newContent"
+                      placeholder='{"key": "value"}'></textarea>
+          </label>
+          <p class="editor-error" id="createError"></p>
+          <button class="btn btn--primary btn--full" id="createBtn">作成</button>
+        </div>
       </div>
-      <div class="create-form">
-        <label class="form-label">
-          ファイルパス
-          <span class="form-hint">例: subdir/data.json</span>
-          <input class="form-input" type="text" id="newPath"
-                 placeholder="path/to/file.json">
-        </label>
-        <label class="form-label">
-          内容 (JSON)
-          <textarea class="form-textarea" id="newContent"
-                    placeholder='{"key": "value"}'></textarea>
-        </label>
-        <p class="editor-error" id="createError"></p>
-        <button class="btn btn--primary btn--full" id="createBtn">作成</button>
+
+      <!-- ファイルアップロード -->
+      <div class="right-section right-section--upload">
+        <div class="pane__header">
+          <span class="pane__title">ファイルアップロード</span>
+        </div>
+        <div class="right-section__inner">
+          <label class="form-label">
+            ファイルパス
+            <span class="form-hint">例: subdir/ （格納先フォルダ、空欄でルート）</span>
+            <input class="form-input" type="text" id="uploadDir"
+                   placeholder="path/to/folder/">
+          </label>
+          <p class="editor-error" id="uploadError"></p>
+          <button class="btn btn--upload btn--full" id="uploadBtn">
+            ファイルを選択してアップロード
+          </button>
+        </div>
       </div>
+
     </aside>
 
   </main>

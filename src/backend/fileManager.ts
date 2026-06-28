@@ -37,6 +37,27 @@ export default class FileManager {
     fs.unlinkSync(abs);
   }
 
+  // ------------------------------------------------------------------ //
+  //  ダウンロード: ROOT_DIR 内のファイルを savePath へコピー
+  // ------------------------------------------------------------------ //
+  downloadFile(relativePath: string, savePath: string): void {
+    const src = this._safePath(relativePath);
+    fs.copyFileSync(src, savePath);
+  }
+
+  // ------------------------------------------------------------------ //
+  //  アップロード: srcPath のファイルを destRelativeDir 以下にコピー
+  // ------------------------------------------------------------------ //
+  uploadFile(srcPath: string, destRelativeDir: string): void {
+    const fileName = path.basename(srcPath);
+    const destRel  = destRelativeDir
+      ? `${destRelativeDir}/${fileName}`
+      : fileName;
+    const dest = this._safePath(destRel);
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.copyFileSync(srcPath, dest);
+  }
+
   private _safePath(relativePath: string): string {
     const abs = path.resolve(this.rootDir, relativePath);
     if (!abs.startsWith(this.rootDir + path.sep) && abs !== this.rootDir) {
@@ -50,7 +71,9 @@ export default class FileManager {
     const nodes: TreeNode[] = [];
 
     for (const entry of entries) {
-      const relPath = relativeDir ? `${relativeDir}/${entry.name}` : entry.name;
+      const relPath = relativeDir
+        ? `${relativeDir}/${entry.name}`
+        : entry.name;
 
       if (entry.isDirectory()) {
         nodes.push({
@@ -59,12 +82,12 @@ export default class FileManager {
           type: 'dir',
           children: this._buildTree(path.join(absDir, entry.name), relPath),
         });
-      } else if (entry.isFile() && entry.name.endsWith('.json')) {
-        nodes.push({
-          name: entry.name,
-          relativePath: relPath,
-          type: 'json',
-        });
+      } else if (entry.isFile()) {
+        if (entry.name.endsWith('.json')) {
+          nodes.push({ name: entry.name, relativePath: relPath, type: 'json' });
+        } else {
+          nodes.push({ name: entry.name, relativePath: relPath, type: 'file' });
+        }
       }
     }
 
