@@ -1,12 +1,17 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+import dotenv from 'dotenv';
 import FileManager from './fileManager';
 import type { DeletePayload, ReadPayload, WritePayload } from '../shared/types';
 
 // ------------------------------------------------------------------ //
 //  定数: 操作対象のルートディレクトリ
 // ------------------------------------------------------------------ //
-const ROOT_DIR: string = '/Users/gakumurakami/000_develop/ナレッジ管理ディレクトリ';
+dotenv.config({ path: path.join(app.getAppPath(), '.env') });
+
+const ROOT_DIR: string = process.env.ROOT_DIR ?? (() => {
+  throw new Error('.env に ROOT_DIR が設定されていません');
+})();
 
 // ------------------------------------------------------------------ //
 //  ウィンドウ生成
