@@ -1,8 +1,14 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import dotenv from 'dotenv';
 import FileManager from './fileManager';
-import type { DeletePayload, ReadPayload, WritePayload } from '../shared/types';
+import type {
+  DeletePayload,
+  DownloadPayload,
+  ReadPayload,
+  UploadPayload,
+  WritePayload,
+} from '../shared/types';
 
 // ------------------------------------------------------------------ //
 //  定数: 操作対象のルートディレクトリ
@@ -52,6 +58,36 @@ const registerIpcHandlers = (fm: FileManager): void => {
   // JSON ファイルを削除する
   ipcMain.handle('fs:delete', (_event, { relativePath }: DeletePayload) => {
     fm.deleteJson(relativePath);
+    return fm.listTree();
+  });
+
+  // ------------------------------------------------------------------ //
+  //  ダウンロード: ネイティブの「名前を付けて保存」ダイアログを開く
+  // ------------------------------------------------------------------ //
+  ipcMain.handle('fs:download', async (
+    _event,
+    { relativePath }: DownloadPayload,
+  ) => {
+    const fileName = relativePath.split('/').pop() ?? relativePath;
+    const { canceled, filePath } = await dialog.showSaveDialog({
+      defaultPath: fileName,
+    });
+    if (canceled || !filePath) return;
+    fm.downloadFile(relativePath, filePath);
+  });
+
+  // ------------------------------------------------------------------ //
+  //  アップロード: ネイティブの「ファイルを開く」ダイアログを開く
+  // ------------------------------------------------------------------ //
+  ipcMain.handle('fs:upload', async (
+    _event,
+    { destRelativeDir }: UploadPayload,
+  ) => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ['openFile'],
+    });
+    if (canceled || filePaths.length === 0) return fm.listTree();
+    fm.uploadFile(filePaths[0], destRelativeDir);
     return fm.listTree();
   });
 };

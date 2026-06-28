@@ -1,30 +1,49 @@
 // ------------------------------------------------------------------ //
 //  DOM 参照
 // ------------------------------------------------------------------ //
-const treeEl = document.getElementById('tree')!;
-const editorEl = document.getElementById('editor') as HTMLTextAreaElement;
-const editorTitle = document.getElementById('editorTitle')!;
-const editorError = document.getElementById('editorError')!;
-const saveBtn = document.getElementById('saveBtn') as HTMLButtonElement;
-const deleteBtn = document.getElementById('deleteBtn') as HTMLButtonElement;
-const refreshBtn = document.getElementById('refreshBtn')!;
-const newPathEl = document.getElementById('newPath') as HTMLInputElement;
-const newContentEl = document.getElementById('newContent') as HTMLTextAreaElement;
-const createError = document.getElementById('createError')!;
-const createBtn = document.getElementById('createBtn')!;
-const rootBadge = document.getElementById('rootBadge')!;
+const treeEl        = document.getElementById('tree')!;
+const editorEl      = document.getElementById('editor') as HTMLTextAreaElement;
+const editorTitle   = document.getElementById('editorTitle')!;
+const editorError   = document.getElementById('editorError')!;
+const saveBtn       = document.getElementById('saveBtn') as HTMLButtonElement;
+const deleteBtn     = document.getElementById('deleteBtn') as HTMLButtonElement;
+const refreshBtn    = document.getElementById('refreshBtn')!;
+const newPathEl     = document.getElementById('newPath') as HTMLInputElement;
+const newContentEl  = document.getElementById('newContent') as HTMLTextAreaElement;
+const createError   = document.getElementById('createError')!;
+const createBtn     = document.getElementById('createBtn')!;
+const rootBadge     = document.getElementById('rootBadge')!;
+const uploadDirEl   = document.getElementById('uploadDir') as HTMLInputElement;
+const uploadBtn     = document.getElementById('uploadBtn') as HTMLButtonElement;
+const uploadError   = document.getElementById('uploadError')!;
 
 // 現在エディタで開いているファイルの相対パス
 let currentPath: string | null = null;
 
 // ------------------------------------------------------------------ //
-//  ツリー描画
+//  ユーティリティ
 // ------------------------------------------------------------------ //
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-/** ツリーを取得して再描画する */
+function showToast(message: string): void {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.classList.add('toast--visible');
+    setTimeout(() => {
+      toast.classList.remove('toast--visible');
+      toast.addEventListener('transitionend', () => toast.remove());
+    }, 2000);
+  });
+}
+
+// ------------------------------------------------------------------ //
+//  ツリー描画
+// ------------------------------------------------------------------ //
 async function refreshTree(): Promise<void> {
   try {
     const nodes = await window.fileAPI.list();
@@ -34,7 +53,6 @@ async function refreshTree(): Promise<void> {
   }
 }
 
-/** ノード配列を再帰的に <ul> へ変換する */
 function buildTreeUl(nodes: TreeNode[]): HTMLUListElement {
   const ul = document.createElement('ul');
   ul.className = 'tree__list';
@@ -62,7 +80,9 @@ function buildTreeUl(nodes: TreeNode[]): HTMLUListElement {
       });
 
       li.append(toggle, label, children);
-    } else {
+
+    } else if (node.type === 'json') {
+      // JSON ファイル → エディタで開く
       const label = document.createElement('span');
       label.className = 'tree__label tree__label--file';
       if (node.relativePath === currentPath) {
@@ -71,6 +91,20 @@ function buildTreeUl(nodes: TreeNode[]): HTMLUListElement {
       label.textContent = node.name;
       label.addEventListener('click', () => openFile(node.relativePath));
       li.appendChild(label);
+
+    } else {
+      // その他ファイル → ダウンロード
+      const label = document.createElement('span');
+      label.className = 'tree__label tree__label--file tree__label--other';
+      label.textContent = node.name;
+      label.title = 'クリックでダウンロード';
+
+      const hint = document.createElement('span');
+      hint.className = 'tree__dl-hint';
+      hint.textContent = '↓';
+
+      label.addEventListener('click', () => downloadFile(node.relativePath));
+      li.append(label, hint);
     }
 
     ul.appendChild(li);
@@ -89,10 +123,8 @@ function renderTree(nodes: TreeNode[]): void {
 }
 
 // ------------------------------------------------------------------ //
-//  エディタ操作
+//  JSON エディタ操作
 // ------------------------------------------------------------------ //
-
-/** ファイルを開いてエディタに表示する */
 async function openFile(relativePath: string): Promise<void> {
   try {
     const data = await window.fileAPI.read(relativePath);
@@ -109,7 +141,6 @@ async function openFile(relativePath: string): Promise<void> {
   }
 }
 
-/** エディタの内容を保存する */
 saveBtn.addEventListener('click', async () => {
   if (!currentPath) return;
   editorError.textContent = '';
@@ -131,7 +162,6 @@ saveBtn.addEventListener('click', async () => {
   }
 });
 
-/** 現在開いているファイルを削除する */
 deleteBtn.addEventListener('click', async () => {
   if (!currentPath) return;
   if (!confirm(`「${currentPath}」を削除しますか？`)) return;
@@ -153,7 +183,18 @@ deleteBtn.addEventListener('click', async () => {
 });
 
 // ------------------------------------------------------------------ //
-//  新規作成
+//  ダウンロード
+// ------------------------------------------------------------------ //
+async function downloadFile(relativePath: string): Promise<void> {
+  try {
+    await window.fileAPI.download(relativePath);
+  } catch (err) {
+    showToast(`ダウンロード失敗: ${errorMessage(err)}`);
+  }
+}
+
+// ------------------------------------------------------------------ //
+//  新規 JSON 作成
 // ------------------------------------------------------------------ //
 createBtn.addEventListener('click', async () => {
   createError.textContent = '';
@@ -190,23 +231,23 @@ createBtn.addEventListener('click', async () => {
 });
 
 // ------------------------------------------------------------------ //
-//  ユーティリティ
+//  ファイルアップロード
 // ------------------------------------------------------------------ //
+uploadBtn.addEventListener('click', async () => {
+  uploadError.textContent = '';
+  const destDir = uploadDirEl.value.trim();
 
-/** 一時的なトーストメッセージを表示する */
-function showToast(message: string): void {
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  requestAnimationFrame(() => {
-    toast.classList.add('toast--visible');
-    setTimeout(() => {
-      toast.classList.remove('toast--visible');
-      toast.addEventListener('transitionend', () => toast.remove());
-    }, 2000);
-  });
-}
+  try {
+    const newTree = await window.fileAPI.upload(destDir);
+    if (newTree) {
+      renderTree(newTree);
+      uploadDirEl.value = '';
+      showToast('アップロードしました');
+    }
+  } catch (err) {
+    uploadError.textContent = `アップロード失敗: ${errorMessage(err)}`;
+  }
+});
 
 // ------------------------------------------------------------------ //
 //  初期化

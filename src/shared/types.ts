@@ -7,6 +7,12 @@ export type JsonFileNode = {
   type: 'json';
 };
 
+export type OtherFileNode = {
+  name: string;
+  relativePath: string;
+  type: 'file';
+};
+
 export type DirNode = {
   name: string;
   relativePath: string;
@@ -14,7 +20,7 @@ export type DirNode = {
   children: TreeNode[];
 };
 
-export type TreeNode = JsonFileNode | DirNode;
+export type TreeNode = JsonFileNode | OtherFileNode | DirNode;
 
 export type JsonValue = unknown;
 
@@ -24,6 +30,8 @@ export interface FileAPI {
   read(relativePath: string): Promise<JsonValue>;
   write(relativePath: string, data: JsonValue): Promise<TreeNode[]>;
   delete(relativePath: string): Promise<TreeNode[]>;
+  download(relativePath: string): Promise<void>;
+  upload(destRelativeDir: string): Promise<TreeNode[]>;
 }
 
 export interface ReadPayload {
@@ -37,4 +45,12 @@ export interface WritePayload {
 
 export interface DeletePayload {
   relativePath: string;
+}
+
+export interface DownloadPayload {
+  relativePath: string;
+}
+
+export interface UploadPayload {
+  destRelativeDir: string;
 }
