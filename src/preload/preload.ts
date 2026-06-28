@@ -1,6 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { FileAPI, JsonValue } from '../shared/types';
 
+// ------------------------------------------------------------------ //
+//  フロントエンドに公開するAPIの定義
+// ------------------------------------------------------------------ //
 const fileAPI: FileAPI = {
   getRootDir: () => ipcRenderer.invoke('fs:getRootDir'),
 
@@ -16,4 +19,7 @@ const fileAPI: FileAPI = {
     ipcRenderer.invoke('fs:delete', { relativePath }),
 };
 
+// ------------------------------------------------------------------ //
+//  APIの公開
+// ------------------------------------------------------------------ //
 contextBridge.exposeInMainWorld('fileAPI', fileAPI);
